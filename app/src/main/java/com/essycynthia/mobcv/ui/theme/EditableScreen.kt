@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.essycynthia.mobcv.CvViewModel
 import com.essycynthia.mobcv.R
@@ -33,28 +34,44 @@ fun EditableScreen(
 
     ) {
     var fullNamesTextFieldValue by remember { mutableStateOf(viewModel.fullNames.value) }
+    val fullNames by remember { mutableStateOf(viewModel.fullNames.value) }
     var slackUserNameTextFieldValue by remember { mutableStateOf(viewModel.slackUserName.value) }
     var githubHandleTextFieldValue by remember { mutableStateOf(viewModel.githubHandle.value) }
     var bioTextFieldValue by remember { mutableStateOf(viewModel.personalBio.value) }
     var hasChanges by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
-    var confirmChanges by remember { mutableStateOf(false) }
+    var discardChanges by remember { mutableStateOf(false) }
 
 
     BackHandler {
-        if (hasChanges) {
-            // Show a confirmation dialog
+        if (hasChanges && !discardChanges) {            // Show a confirmation dialog
             showDialog = true
-            if (confirmChanges) {
-                // User confirmed the changes, popBackStack
-                navController.popBackStack()
-            }
-
-
         } else {
             // If no changes, just popBackStack
             navController.popBackStack()
         }
+    }
+    if (showDialog) {
+        ShowDialogToDiscardChanges(
+            navController = navController,
+            onConfirmChanges = {
+                // User confirmed the changes
+                discardChanges = true
+                navController.popBackStack()
+            },
+            onCancelChanges = {
+                // User canceled the changes
+                discardChanges = true
+                hasChanges = false
+                fullNames?.let {
+                    viewModel.getName(it)
+                }
+                slackUserNameTextFieldValue = viewModel.slackUserName.value
+                githubHandleTextFieldValue = viewModel.githubHandle.value
+                bioTextFieldValue = viewModel.personalBio.value
+                navController.popBackStack()
+            }
+        )
     }
 
 
@@ -63,7 +80,6 @@ fun EditableScreen(
             value = fullNamesTextFieldValue!!,
             onValueChange = {
                 fullNamesTextFieldValue = it
-                viewModel.updateName(it)
                 hasChanges = true
             },
             label = { Text(stringResource(id = R.string.enter_full_names)) },
@@ -75,7 +91,6 @@ fun EditableScreen(
             value = slackUserNameTextFieldValue!!,
             onValueChange = {
                 slackUserNameTextFieldValue = it
-                viewModel.updateSlackUserName(it)
                 hasChanges = true
             },
             label = { Text(stringResource(id = R.string.enter_slack_username)) },
@@ -88,7 +103,6 @@ fun EditableScreen(
             value = githubHandleTextFieldValue!!,
             onValueChange = {
                 githubHandleTextFieldValue = it
-                viewModel.updateGithubHandle(it)
                 hasChanges = true
             },
             label = { Text(stringResource(id = R.string.enter_github_url)) },
@@ -101,7 +115,6 @@ fun EditableScreen(
             value = bioTextFieldValue!!,
             onValueChange = {
                 bioTextFieldValue = it
-                viewModel.updatePersonalBio(it)
                 hasChanges = true
             },
             label = { Text(stringResource(id = R.string.describe_yourself)) },
@@ -112,44 +125,60 @@ fun EditableScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = {
-            navController.popBackStack()
-        },
+        Button(
+            onClick = {
+                viewModel.updateName(fullNamesTextFieldValue!!)
+                viewModel.updateSlackUserName(slackUserNameTextFieldValue!!)
+                viewModel.updateGithubHandle(githubHandleTextFieldValue!!)
+                viewModel.updatePersonalBio(bioTextFieldValue!!)
+                navController.popBackStack()
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)) {
+                .padding(8.dp)
+        ) {
             Text(text = stringResource(id = R.string.save))
         }
     }
     if (showDialog) {
-        ShowDialogToDiscardChanges(navController) {
-            showDialog = false
-            if (confirmChanges) {
-                navController.popBackStack()
+        ShowDialogToDiscardChanges(
+            navController = navController,
+            onConfirmChanges = {
+                // User confirmed the changes
+                discardChanges = true
+                navController.popBackStack()// Set showDialog to false to dismiss the dialog
+                // ...
+            },
+            onCancelChanges = {
+                // User canceled the changes
+                showDialog = false // Set showDialog to false to dismiss the dialog
+                // ...
             }
-        }
+        )
     }
-}
 
+
+}
 
 @Composable
 fun ShowDialogToDiscardChanges(
     navController: NavController,
-    onCloseDialog: () -> Unit
+    onConfirmChanges: () -> Unit,
+    onCancelChanges: () -> Unit
 ) {
 
     AlertDialog(
         onDismissRequest = {
-            onCloseDialog()
+            // Dismiss the dialog without confirming or canceling changes
+            onCancelChanges()
         },
         title = { Text("Discard Changes?") },
         text = { Text("Do you want to discard changes?") },
         confirmButton = {
             TextButton(
                 onClick = {
-                    navController.popBackStack()
-                    onCloseDialog()
-
+                    // User confirmed the changes
+                    onConfirmChanges()
 
                 }
             ) {
@@ -159,8 +188,8 @@ fun ShowDialogToDiscardChanges(
         dismissButton = {
             TextButton(
                 onClick = {
-                    // Dismiss the dialog
-                    onCloseDialog()
+                    // User canceled the changes
+                    onCancelChanges()
                 }
             ) {
                 Text("Cancel")

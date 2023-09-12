@@ -68,7 +68,7 @@ fun CvScreen(
                     fontSize = 25.sp
                 )
             }
-            Row {
+            Row (Modifier.padding(horizontal = 8.dp)){
                 Text(text = "$fullNames")
             }
         }
@@ -87,7 +87,7 @@ fun CvScreen(
                     fontSize = 25.sp
                 )
             }
-            Row {
+            Row (Modifier.padding(horizontal = 8.dp)){
                 Text(text = "$slackUserName")
             }
         }
@@ -107,7 +107,7 @@ fun CvScreen(
                 )
             }
 
-            Row {
+            Row (Modifier.padding(horizontal = 8.dp)){
                 Text(text = "$githubHandle")
             }
         }
@@ -126,7 +126,7 @@ fun CvScreen(
                     fontSize = 25.sp
                 )
             }
-            Row {
+            Row (Modifier.padding(horizontal = 8.dp)){
                 Text(text = "$bio")
             }
         }

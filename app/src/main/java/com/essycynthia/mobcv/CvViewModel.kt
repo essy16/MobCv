@@ -16,6 +16,10 @@ class CvViewModel : ViewModel() {
     val githubHandle : LiveData<String>  = _githubHandle
     val personalBio : LiveData<String>  = _personalBio
 
+    fun getName(_fullNames: String) {
+        this._fullNames.value= _fullNames
+    }
+
     fun updateName(newName: String) {
         _fullNames.value = newName
     }
