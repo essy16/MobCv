@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">MobCv</string>
+    <string name="edit_cv">EDIT MY CV</string>
+    <string name="save">SAVE</string>
+    <string name="enter_github_url">Enter Github Url</string>
+    <string name="enter_full_names">Enter Full Names</string>
+    <string name="enter_slack_username">Enter Slack Username</string>
+    <string name="describe_yourself">Describe yourself</string>
+    <string name="my_names">Full Names</string>
+    <string name="my_slack_username"> Slack Username</string>
+    <string name="my_github">Github Username</string>
+    <string name="my_bio">About me!</string>
+</resources>
